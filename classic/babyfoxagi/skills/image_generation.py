@@ -16,7 +16,7 @@ class ImageGeneration(Skill):
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
         
-        response = requests.get(url)
+        response = requests.get(url, timeout=60)
         
         # Extract file name from URL
         parsed_url = urlparse(url)

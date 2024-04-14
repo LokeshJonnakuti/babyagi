@@ -75,7 +75,7 @@ class AirtableSearch(Skill):
         
 
             # Make the API request to retrieve the data from Airtable
-            response = requests.get(url, headers=headers)
+            response = requests.get(url, headers=headers, timeout=60)
 
             # Check if the API request was successful
             if response.status_code == 200:

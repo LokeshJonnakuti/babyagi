@@ -17,7 +17,7 @@ class PlayMusic(Skill):
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
         
-        response = requests.get(url)
+        response = requests.get(url, timeout=60)
         
         # Extract file name from URL
         parsed_url = urlparse(url)
@@ -57,7 +57,7 @@ class PlayMusic(Skill):
         
         params = {"q": f"{search_type}:'{query}'"}
         
-        response = requests.get(base_url, params=params)
+        response = requests.get(base_url, params=params, timeout=60)
         
         if response.status_code != 200:
             print("Failed to get data:", response.status_code)

@@ -78,7 +78,7 @@ def web_search_tool(query: str):
     return str(results["organic_results"])
 
 def web_scrape_tool(url: str):
-    response = requests.get(url)
+    response = requests.get(url, timeout=60)
     print(response)
     soup = BeautifulSoup(response.content, "html.parser")
     result = soup.get_text(strip=True)+"URLs: "
