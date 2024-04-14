@@ -40,7 +40,7 @@ console.log(`${OBJECTIVE}`)
 
 console.log(`\x1b[93m\x1b[1m \nInitial task: \x1b[0m\x1b[0m ${INITIAL_TASK}`)
 
-// Define OpenAI embedding function using Chroma 
+// Define OpenAI embedding function using Chroma
 const embeddingFunction = new OpenAIEmbeddingFunction(OPENAI_API_KEY)
 
 // Configure OpenAI
@@ -67,14 +67,14 @@ const chromaConnect = async ()=>{
             TABLE_NAME,
             {
                 "hnsw:space": metric
-            }, 
+            },
             embeddingFunction
         )
         return collection
     }
 }
 
-const add_task = (task)=>{ taskList.push(task) } 
+const add_task = (task)=>{ taskList.push(task) }
 
 const clear_tasks = ()=>{ taskList = [] }
 
@@ -113,15 +113,15 @@ const openai_completion = async (prompt, temperature=0.5, maxTokens=100)=>{
 
 const task_creation_agent = async (objective, result, task_description, taskList)=>{
     const prompt = `
-        You are an task creation AI that uses the result of an execution agent to create new tasks with the following objective: ${objective}, 
-        The last completed task has the result: ${result}. 
-        This result was based on this task description: ${task_description}. 
-        These are incomplete tasks: ${taskList.map(task=>`${task.taskId}: ${task.taskName}`).join(', ')}. 
-        Based on the result, create new tasks to be completed by the AI system that do not overlap with incomplete tasks. 
+        You are an task creation AI that uses the result of an execution agent to create new tasks with the following objective: ${objective},
+        The last completed task has the result: ${result}.
+        This result was based on this task description: ${task_description}.
+        These are incomplete tasks: ${taskList.map(task=>`${task.taskId}: ${task.taskName}`).join(', ')}.
+        Based on the result, create new tasks to be completed by the AI system that do not overlap with incomplete tasks.
         Return the tasks as an array.`
     const response = await openai_completion(prompt)
     const newTasks = response.trim().includes("\n") ? response.trim().split("\n") : [response.trim()];
-    return newTasks.map(taskName => ({ taskName: taskName }));    
+    return newTasks.map(taskName => ({ taskName: taskName }));
 }
 
 
@@ -130,7 +130,7 @@ const prioritization_agent = async (taskId)=>{
     const taskNames = taskList.map((task)=>task.taskName)
     const nextTaskId = taskId+1
     const prompt = `
-    You are an task prioritization AI tasked with cleaning the formatting of and reprioritizing the following tasks: ${taskNames}. 
+    You are an task prioritization AI tasked with cleaning the formatting of and reprioritizing the following tasks: ${taskNames}.
     Consider the ultimate objective of your team:${OBJECTIVE}. Do not remove any tasks. Return the result as a numbered list, like:
     #. First task
     #. Second task
@@ -144,7 +144,7 @@ const prioritization_agent = async (taskId)=>{
             const newTaskId = newTaskParts[0].trim()
             const newTaskName = newTaskParts[1].trim()
             add_task({
-                taskId: newTaskId, 
+                taskId: newTaskId,
                 taskName: newTaskName
             })
         }
@@ -167,8 +167,8 @@ const context_agent = async (query, topResultsNum, chromaCollection)=>{
         return []
     }
     const results = await chromaCollection.query(
-        undefined, 
-        Math.min(topResultsNum, count), 
+        undefined,
+        Math.min(topResultsNum, count),
         undefined,
         query,
     )
@@ -198,7 +198,7 @@ function sleep(ms) {
             const task = taskList.shift()
             console.log("\x1b[92m\x1b[1m"+"\n*****NEXT TASK*****\n"+"\x1b[0m\x1b[0m")
             console.log(task.taskId + ": " + task.taskName)
-            
+
             // Send to execution function to complete the task based on the context
             const result = await execution_agent(OBJECTIVE, task.taskName, chromaCollection)
             const currTaskId = task.taskId
@@ -226,7 +226,7 @@ function sleep(ms) {
                     vector
                 )
             }
-            
+
             // Step 3: Create new tasks and reprioritize task list
             const newTasks = await task_creation_agent(OBJECTIVE, enrichedResult, task.taskName, taskList.map(task=>task.taskName))
             newTasks.forEach((task)=>{
@@ -239,4 +239,3 @@ function sleep(ms) {
         }
     }
 })()
- 
