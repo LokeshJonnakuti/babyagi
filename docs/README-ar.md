@@ -56,18 +56,18 @@ BabyAGI
 لاستخدام البرنامج، ستحتاج إلى إتباع هذه الخطوات:
 
 1.	استنسخ المستودع عن طريق الأمر `git clone https://github.com/yoheinakajima/babyagi.git` وانتقل إلى المجلد الجديد باستخدام الأمر `cd`
-2.	قم بتثبيت الحزم المطلوبة: ` pip install -r requirements.txt` (يفضل استخدام بيئة Python افتراضية) 
+2.	قم بتثبيت الحزم المطلوبة: ` pip install -r requirements.txt` (يفضل استخدام بيئة Python افتراضية)
 3.	قم بنسخ ملف `.env.example`  إلى `.env` حيث يجب تعديل عدة متغيرات:
 -	قم بتعيين مفتاح API OpenAI الخاص بك في المتغير ` OPENAI_API_KEY` والنموذج عبر المتغير ` OPENAPI_API_MODEL`
 -	قم بتعيين اسم الجدول الذي سيتم تخزين نتائج المهام فيه في المتغير ` TABLE_NAME`
 -	(اختياري) قم بتعيين اسم BabyAGI في المتغير ` BABY_NAME`
 -	(اختياري) قم بتعيين هدف نظام إدارة المهام في المتغير ` OBJECTIVE`
--	(اختياري) قم بتعيين أول مهمة للنظام في المتغير ` INITIAL_TASK` 
+-	(اختياري) قم بتعيين أول مهمة للنظام في المتغير ` INITIAL_TASK`
 4.	قم بتشغيل البرنامج باستخدام الأمر `python babyagi.py`
 كل القيم الاختيارية يمكن ايضاً تمريرها عبر أمر تشغيل البرنامج.
 
 
-# التشغيل عبر Docker 
+# التشغيل عبر Docker
 
 ستحتاج إلى تثبيت Docker و Docker Compose.
 Docker Desktop هو الخيار الأسهل https://www.docker.com/products/docker-desktop
@@ -122,5 +122,3 @@ BabyAGI  هو برنامج مبسط من الفكرة الرئيسية التي 
 
 
 صُنع بحب من قبل [@yoheinakajima](https://twitter.com/yoheinakajima)، أعمل كمستثمر VC و سأحب سماع ما تقوم ببناؤه!
-
- 

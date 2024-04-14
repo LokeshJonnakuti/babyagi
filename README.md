@@ -86,7 +86,7 @@ This script works with all OpenAI models, as well as Llama and its variations th
 
 ## Llama
 
-Llama integration requires llama-cpp package. You will also need the Llama model weights. 
+Llama integration requires llama-cpp package. You will also need the Llama model weights.
 
 - **Under no circumstances share IPFS, magnet links, or any other links to model downloads anywhere in this repository, including in issues, discussions or pull requests. They will be immediately deleted.**
 
