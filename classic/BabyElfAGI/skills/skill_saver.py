@@ -1,9 +1,11 @@
-from skills.skill import Skill
 import os
+
 import openai
+from skills.skill import Skill
+
 
 class SkillSaver(Skill):
-    name = 'skill_saver'
+    name = "skill_saver"
     description = "A skill that saves code written in a previous step into a file within the skills folder. Not for writing code."
     api_keys_required = []
 
@@ -15,10 +17,8 @@ class SkillSaver(Skill):
             return
 
         task_prompt = f"Extract the code and only the code from the dependent task output here: {dependent_task_outputs}  \n###\nCODE:"
-      
-        messages = [
-            {"role": "user", "content": task_prompt}
-        ]
+
+        messages = [{"role": "user", "content": task_prompt}]
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
@@ -26,15 +26,13 @@ class SkillSaver(Skill):
             max_tokens=3000,
             top_p=1,
             frequency_penalty=0,
-            presence_penalty=0
-        ) 
-    
-        code =  response.choices[0].message['content'].strip()
+            presence_penalty=0,
+        )
+
+        code = response.choices[0].message["content"].strip()
         task_prompt = f"Come up with a file name (eg. 'get_weather.py') for the following skill:{code}\n###\nFILE_NAME:"
-      
-        messages = [
-            {"role": "user", "content": task_prompt}
-        ]
+
+        messages = [{"role": "user", "content": task_prompt}]
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
@@ -42,14 +40,14 @@ class SkillSaver(Skill):
             max_tokens=3000,
             top_p=1,
             frequency_penalty=0,
-            presence_penalty=0
-        ) 
-    
-        file_name =  response.choices[0].message['content'].strip()
-        file_path = os.path.join('skills',file_name)
+            presence_penalty=0,
+        )
+
+        file_name = response.choices[0].message["content"].strip()
+        file_path = os.path.join("skills", file_name)
 
         try:
-            with open(file_path, 'w') as file:
+            with open(file_path, "w") as file:
                 file.write(code)
                 print(f"Code saved successfully: {file_name}")
         except:

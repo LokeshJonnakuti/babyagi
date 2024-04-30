@@ -63,13 +63,13 @@
             if (data.objective) {
                 displayTaskWithStatus(`Task: ${data.objective}`, "ongoing", data.skill_used, data.task_id);
             }
-          
+
             if (data.path !== "ChatCompletion") {
                 checkTaskCompletion(data.task_id);
             } else {
-                
+
             }
-            
+
         }
 
         function handleResponseError(error) {
@@ -131,7 +131,7 @@ function fetchTaskOutput(taskId) {
                 const $outputContainer = $taskItem.find('.task-output');
                 console.log('outputContainer:'+$outputContainer)
                 console.log('data.output:'+data.output)
-                
+
                 // Update the task's output content
                 $outputContainer.html(`<p>${data.output}</p>`);
             }
@@ -148,7 +148,7 @@ function fetchTaskOutput(taskId) {
 $(document).ready(function() {
   toggleSendButton();
   loadPreviousMessages();
-  loadAllTasks(); 
+  loadAllTasks();
   $("#send-btn").on('click', function() {
     sendMessage();
   });
@@ -210,7 +210,7 @@ function displayTaskWithStatus(taskDescription, status, skillType = "Unknown Ski
     const taskHTML = `
          <div class="task-item" data-task-id="${taskId}">
              <span class="task-title">${taskDescription}</span></br>
-             <span class="toggle-output-icon" style="cursor: pointer;">▶</span> 
+             <span class="toggle-output-icon" style="cursor: pointer;">▶</span>
              ${statusBadgeHTML}${skillBadgeHTML}
              <div class="task-output hidden">
                  ${outputHTML}
@@ -222,13 +222,13 @@ function displayTaskWithStatus(taskDescription, status, skillType = "Unknown Ski
 
 function updateTaskStatus(taskId, status, output) {
     const $taskToUpdate = $(`#task-list > .task-item[data-task-id="${taskId}"]`);
-    
+
     // Remove the existing status badge
     $taskToUpdate.find(".status-badge").remove();
-    
+
     // Insert the new status badge right before the skill badge
     $taskToUpdate.find(".toggle-output-icon").after(getStatusBadgeHTML(status));
-    
+
     // Update output, if available
     const $outputContainer = $taskToUpdate.find(".task-output");
     if (output) {

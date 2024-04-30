@@ -2,7 +2,7 @@
 
 # Objetivo
 
-Este script Python é um exemplo de um sistema de gerenciamento de tarefas orquestrado por uma IA. O sistema utiliza as APIs da OpenAI e Pinecone para criar, priorizar e executar tarefas. A ideia principal por trás deste sistema é criar tarefas com base no resultado das tarefas anteriores e em direção a um objetivo predefinido. 
+Este script Python é um exemplo de um sistema de gerenciamento de tarefas orquestrado por uma IA. O sistema utiliza as APIs da OpenAI e Pinecone para criar, priorizar e executar tarefas. A ideia principal por trás deste sistema é criar tarefas com base no resultado das tarefas anteriores e em direção a um objetivo predefinido.
 
 O script usa então os recursos de processamento de linguagem natural (NLP) da OpenAI para criar novas tarefas com base no objetivo e o Pinecone para armazenar e recuperar resultados das  tarefas para o contexto atual. Esta é uma versão simplificada do original [Agente Autônomo Orientado a Tarefas](https://twitter.com/yoheinakajima/status/1640934493489070080?s=20) (28 de março de 2023).
 
