@@ -36,5 +36,5 @@ The code is written to a folder called `playground` in Babycoder's root director
 
 - Configure BabyAgi by following the instructions in the main README file.
 - Navigate to the babycoder directory: `cd babycoder`
-- Make a copy of the objective.sample.txt file (`cp objective.sample.txt objective.txt`) and update it to contain the objective of the project you want to create. 
+- Make a copy of the objective.sample.txt file (`cp objective.sample.txt objective.txt`) and update it to contain the objective of the project you want to create.
 - Finally, from the `./babycoder` directory, run: `python babycoder.py` and watch it write code for you!

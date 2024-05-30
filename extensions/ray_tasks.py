@@ -1,17 +1,24 @@
-import sys
 import logging
-import ray
+import sys
 from collections import deque
+from pathlib import Path
 from typing import Dict, List
 
-from pathlib import Path
+import ray
+
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from extensions.ray_objectives import CooperativeObjectivesListStorage
 
 try:
-    ray.init(address="auto", namespace="babyagi", logging_level=logging.FATAL, ignore_reinit_error=True)
+    ray.init(
+        address="auto",
+        namespace="babyagi",
+        logging_level=logging.FATAL,
+        ignore_reinit_error=True,
+    )
 except:
     ray.init(namespace="babyagi", logging_level=logging.FATAL, ignore_reinit_error=True)
+
 
 @ray.remote
 class CooperativeTaskListStorageActor:
@@ -38,6 +45,7 @@ class CooperativeTaskListStorageActor:
     def get_task_names(self):
         return [t["task_name"] for t in self.tasks]
 
+
 class CooperativeTaskListStorage:
     def __init__(self, name: str):
         self.name = name
@@ -45,7 +53,9 @@ class CooperativeTaskListStorage:
         try:
             self.actor = ray.get_actor(name=self.name, namespace="babyagi")
         except ValueError:
-            self.actor = CooperativeTaskListStorageActor.options(name=self.name, namespace="babyagi", lifetime="detached").remote()
+            self.actor = CooperativeTaskListStorageActor.options(
+                name=self.name, namespace="babyagi", lifetime="detached"
+            ).remote()
 
         objectives = CooperativeObjectivesListStorage()
         objectives.append(self.name)
