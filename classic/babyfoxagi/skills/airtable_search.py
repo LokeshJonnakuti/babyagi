@@ -1,8 +1,7 @@
 from skills.skill import Skill
 import openai
-import os
-import requests
 from urllib.parse import quote  # Python built-in URL encoding function
+from security import safe_requests
 
 #This Airtable Skill is tuned to work with our Airtable set up, where we are seaeching a specific column in a specific table, in a specific base. ll three variables need to be set below (Lines 55-59)
 class AirtableSearch(Skill):
@@ -75,7 +74,7 @@ class AirtableSearch(Skill):
         
 
             # Make the API request to retrieve the data from Airtable
-            response = requests.get(url, headers=headers)
+            response = safe_requests.get(url, headers=headers)
 
             # Check if the API request was successful
             if response.status_code == 200:

@@ -1,8 +1,8 @@
 from skills.skill import Skill
 import openai
-import requests
 import os
 from urllib.parse import urlparse
+from security import safe_requests
 
 class ImageGeneration(Skill):
     name = 'image_generation'
@@ -16,7 +16,7 @@ class ImageGeneration(Skill):
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
         
-        response = requests.get(url)
+        response = safe_requests.get(url)
         
         # Extract file name from URL
         parsed_url = urlparse(url)

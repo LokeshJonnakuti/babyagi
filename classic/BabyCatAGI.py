@@ -2,15 +2,13 @@
 ######IMPORTANT NOTE: I'm sharing this as a framework to build on top of (with lots of errors for improvement), to facilitate discussion around how to improve these. This is NOT for people who are looking for a complete solution that's ready to use. ######
 
 import openai
-import time
 import requests
 from bs4 import BeautifulSoup
-from collections import deque
 from typing import Dict, List
 import re
-import ast
 import json
 from serpapi import GoogleSearch
+from security import safe_requests
 
 ### SET THESE 4 VARIABLES ##############################
 
@@ -145,7 +143,7 @@ headers = {
 
 def fetch_url_content(url: str):
     try:
-        response = requests.get(url, headers=headers, timeout=10)
+        response = safe_requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
         return response.content
     except requests.exceptions.RequestException as e:

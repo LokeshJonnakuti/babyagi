@@ -2,16 +2,13 @@
 ######IMPORTANT NOTE: I'm sharing this as a framework to build on top of (with lots of errors for improvement), to facilitate discussion around how to improve these. This is NOT for people who are looking for a complete solution that's ready to use. ######
 
 import openai
-import pinecone
 import time
-import requests
 from bs4 import BeautifulSoup
-from collections import deque
 from typing import Dict, List
 import re
-import ast
 import json
 from serpapi import GoogleSearch
+from security import safe_requests
 
 ### SET THESE 4 VARIABLES ##############################
 
@@ -78,7 +75,7 @@ def web_search_tool(query: str):
     return str(results["organic_results"])
 
 def web_scrape_tool(url: str):
-    response = requests.get(url)
+    response = safe_requests.get(url)
     print(response)
     soup = BeautifulSoup(response.content, "html.parser")
     result = soup.get_text(strip=True)+"URLs: "
