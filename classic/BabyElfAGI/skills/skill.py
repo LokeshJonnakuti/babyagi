@@ -1,6 +1,6 @@
 class Skill:
-    name = 'base skill'
-    description = 'This is the base skill.'
+    name = "base skill"
+    description = "This is the base skill."
     api_keys_required = []
 
     def __init__(self, api_keys):
@@ -23,11 +23,15 @@ class Skill:
         missing_keys = []
         for key in self.api_keys_required:
             if isinstance(key, list):  # If the key is actually a list of alternatives
-                if not any(k in api_keys for k in key):  # If none of the alternatives are present
-                    missing_keys.append(key)  # Add the list of alternatives to the missing keys
+                if not any(
+                    k in api_keys for k in key
+                ):  # If none of the alternatives are present
+                    missing_keys.append(
+                        key
+                    )  # Add the list of alternatives to the missing keys
             elif key not in api_keys:  # If the key is a single key and it's not present
                 missing_keys.append(key)  # Add the key to the missing keys
         return missing_keys
 
     def execute(self, params, dependent_task_outputs, objective):
-        raise NotImplementedError('Execute method must be implemented in subclass.')
+        raise NotImplementedError("Execute method must be implemented in subclass.")

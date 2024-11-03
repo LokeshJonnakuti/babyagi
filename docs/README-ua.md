@@ -34,7 +34,7 @@ This README will cover the following:
 # Як використовувати скрипт<a name="how-to-use"></a>
 Для використання скрипту вам потрібно виконати наступні кроки:
 
-1. Зклонуйте репозиторій через `git clone https://github.com/yoheinakajima/babyagi.git` та перейдіть до клонованого репозиторію за допомогою команди `cd`. 
+1. Зклонуйте репозиторій через `git clone https://github.com/yoheinakajima/babyagi.git` та перейдіть до клонованого репозиторію за допомогою команди `cd`.
 2. Встановіть необхідні пакети: `pip install -r requirements.txt`
 3. Скопіюйте файл .env.example в .env: `cp .env.example .env`. Тут треба встановити наступні змінні.
 4. Встановіть свої ключі OpenAI та Pinecone API в змінні OPENAI_API_KEY, OPENAPI_API_MODEL та PINECONE_API_KEY.

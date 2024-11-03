@@ -1,13 +1,13 @@
-import os
-import openai
-import time
-import sys
-from typing import List, Dict, Union
-from dotenv import load_dotenv
 import json
-import subprocess
+import os
 import platform
+import subprocess
+import sys
+import time
+from typing import Dict, List, Union
 
+import openai
+from dotenv import load_dotenv
 from embeddings import Embeddings
 from security import safe_command
 
@@ -44,23 +44,26 @@ assert OBJECTIVE, "OBJECTIVE missing"
 
 ## Start of Helper/Utility functions ##
 
+
 def print_colored_text(text, color):
     color_mapping = {
-        'blue': '\033[34m',
-        'red': '\033[31m',
-        'yellow': '\033[33m',
-        'green': '\033[32m',
+        "blue": "\033[34m",
+        "red": "\033[31m",
+        "yellow": "\033[33m",
+        "green": "\033[32m",
     }
-    color_code = color_mapping.get(color.lower(), '')
-    reset_code = '\033[0m'
+    color_code = color_mapping.get(color.lower(), "")
+    reset_code = "\033[0m"
     print(color_code + text + reset_code)
+
 
 def print_char_by_char(text, delay=0.00001, chars_at_once=3):
     for i in range(0, len(text), chars_at_once):
-        chunk = text[i:i + chars_at_once]
-        print(chunk, end='', flush=True) 
-        time.sleep(delay) 
+        chunk = text[i : i + chars_at_once]
+        print(chunk, end="", flush=True)
+        time.sleep(delay)
     print()
+
 
 def openai_call(
     prompt: str,
@@ -78,12 +81,12 @@ def openai_call(
             max_tokens=max_tokens,
             top_p=1,
             frequency_penalty=0,
-            presence_penalty=0
+            presence_penalty=0,
         )
         return response.choices[0].text.strip()
     else:
         # Use chat completion API
-        messages=[{"role": "user", "content": prompt}]
+        messages = [{"role": "user", "content": prompt}]
         try:
             response = openai.ChatCompletion.create(
                 model=model,
@@ -99,15 +102,26 @@ def openai_call(
             # try again
             if openai_calls_retried < max_openai_calls_retries:
                 openai_calls_retried += 1
-                print(f"Error calling OpenAI. Retrying {openai_calls_retried} of {max_openai_calls_retries}...")
+                print(
+                    f"Error calling OpenAI. Retrying {openai_calls_retried} of {max_openai_calls_retries}..."
+                )
                 return openai_call(prompt, model, temperature, max_tokens)
+
 
 def execute_command_json(json_string):
     try:
         command_data = json.loads(json_string)
-        full_command = command_data.get('command')
-        
-        process = safe_command.run(subprocess.Popen, full_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True, cwd='playground')
+        full_command = command_data.get("command")
+
+        process = safe_command.run(
+            subprocess.Popen,
+            full_command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            shell=True,
+            cwd="playground",
+        )
         stdout, stderr = process.communicate(timeout=60)
 
         return_code = process.returncode
@@ -125,23 +139,34 @@ def execute_command_json(json_string):
     except Exception as e:
         return f"Error: {str(e)}"
 
+
 def execute_command_string(command_string):
     try:
-        result = safe_command.run(subprocess.run, command_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True, cwd='playground')
+        result = safe_command.run(
+            subprocess.run,
+            command_string,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            shell=True,
+            cwd="playground",
+        )
         output = result.stdout or result.stderr or "No output"
         return output
 
     except Exception as e:
         return f"Error: {str(e)}"
 
+
 def save_code_to_file(code: str, file_path: str):
     full_path = os.path.join(current_directory, "playground", file_path)
     try:
-        mode = 'a' if os.path.exists(full_path) else 'w'
-        with open(full_path, mode, encoding='utf-8') as f:
-            f.write(code + '\n\n')
+        mode = "a" if os.path.exists(full_path) else "w"
+        with open(full_path, mode, encoding="utf-8") as f:
+            f.write(code + "\n\n")
     except:
         pass
+
 
 def refactor_code(modified_code: List[Dict[str, Union[int, str]]], file_path: str):
     full_path = os.path.join(current_directory, "playground", file_path)
@@ -155,7 +180,7 @@ def refactor_code(modified_code: List[Dict[str, Union[int, str]]], file_path: st
         modified_chunk = modification["modified_code"].splitlines()
 
         # Remove original lines within the range
-        del lines[start_line - 1:end_line]
+        del lines[start_line - 1 : end_line]
 
         # Insert the new modified_chunk lines
         for i, line in enumerate(modified_chunk):
@@ -164,7 +189,10 @@ def refactor_code(modified_code: List[Dict[str, Union[int, str]]], file_path: st
     with open(full_path, "w", encoding="utf-8") as f:
         f.writelines(lines)
 
-def split_code_into_chunks(file_path: str, chunk_size: int = 50) -> List[Dict[str, Union[int, str]]]:
+
+def split_code_into_chunks(
+    file_path: str, chunk_size: int = 50
+) -> List[Dict[str, Union[int, str]]]:
     full_path = os.path.join(current_directory, "playground", file_path)
 
     with open(full_path, "r", encoding="utf-8") as f:
@@ -174,13 +202,19 @@ def split_code_into_chunks(file_path: str, chunk_size: int = 50) -> List[Dict[st
     for i in range(0, len(lines), chunk_size):
         start_line = i + 1
         end_line = min(i + chunk_size, len(lines))
-        chunk = {"start_line": start_line, "end_line": end_line, "code": "".join(lines[i:end_line])}
+        chunk = {
+            "start_line": start_line,
+            "end_line": end_line,
+            "code": "".join(lines[i:end_line]),
+        }
         chunks.append(chunk)
     return chunks
+
 
 ## End of Helper/Utility functions ##
 
 ## TASKS AGENTS ##
+
 
 def code_tasks_initializer_agent(objective: str):
     prompt = f"""You are an AGI agent responsible for creating a detailed JSON checklist of tasks that will guide other AGI agents to complete a given programming objective. Your task is to analyze the provided objective and generate a well-structured checklist with a clear starting point and end point, as well as tasks broken down to be very specific, clear, and executable by other agents without the context of other tasks.
@@ -207,7 +241,7 @@ def code_tasks_initializer_agent(objective: str):
     5. Provide the current context for each task, which should be sufficient for the agents to understand and execute the task without referring to other tasks in the checklist. This will help agents avoid task duplication.
 
     6. Pay close attention to the objective and make sure the tasks implement all necessary pieces needed to make the program work.
-    
+
     7. Compile the tasks into a well-structured JSON format, ensuring that it is easy to read and parse by other AGI agents. The JSON should include fields such as task ID, description and file_path.
 
     IMPORTANT: BE VERY CAREFUL WITH IMPORTS AND MANAGING MULTIPLE FILES. REMEMBER EACH AGENT WILL ONLY SEE A SINGLE TASK. ASK YOURSELF WHAT INFORMATION YOU NEED TO INCLUDE IN THE CONTEXT OF EACH TASK TO MAKE SURE THE AGENT CAN EXECUTE THE TASK WITHOUT SEEING THE OTHER TASKS OR WHAT WAS ACCOMPLISHED IN OTHER TASKS.
@@ -249,11 +283,12 @@ def code_tasks_initializer_agent(objective: str):
 
     return openai_call(prompt, temperature=0.8, max_tokens=2000)
 
+
 def code_tasks_refactor_agent(objective: str, task_list_json):
     prompt = f"""You are an AGI tasks_refactor_agent responsible for adapting a task list generated by another agent to ensure the tasks are compatible with the current AGI agents. Your goal is to analyze the task list and make necessary modifications so that the tasks can be executed by the agents listed below
 
     YOU SHOULD OUTPUT THE MODIFIED TASK LIST IN THE SAME JSON FORMAT AS THE INITIAL TASK LIST. DO NOT CHANGE THE FORMAT OF THE JSON OUTPUT. DO NOT WRITE ANYTHING OTHER THAN THE MODIFIED TASK LIST IN THE JSON FORMAT.
-    
+
     The current agents work as follows:
     - code_writer_agent: Writes code snippets or functions and saves them to the appropriate files. This agent can also append code to existing files if required.
     - code_refactor_agent: Responsible for editing current existing code/files.
@@ -298,10 +333,11 @@ def code_tasks_refactor_agent(objective: str, task_list_json):
             }}
 
     IMPORTANT: All tasks should start either with the following phrases: 'Run a command to...', 'Write a code to...', 'Edit the code to...' depending on the agent that will execute the task:
-            
+
     ALWAYS ENSURE ALL TASKS HAVE RELEVANT CONTEXT ABOUT THE CODE TO BE WRITTEN, INCLUDE DETAILS ON HOW TO CALL FUNCTIONS, CLASSES, IMPORTS, ETC. AGENTS HAVE NO VIEW OF OTHER TASKS, SO THEY NEED TO BE SELF-CONTAINED. RETURN THE JSON:"""
 
     return openai_call(prompt, temperature=0, max_tokens=2000)
+
 
 def code_tasks_details_agent(objective: str, task_list_json):
     prompt = f"""You are an AGI agent responsible for improving a list of tasks in JSON format and adding ALL the necessary details to each task. These tasks will be executed individually by agents that have no idea about other tasks or what code exists in the codebase. It is FUNDAMENTAL that each task has enough details so that an individual isolated agent can execute. The metadata of the task is the only information the agents will have.
@@ -311,14 +347,15 @@ def code_tasks_details_agent(objective: str, task_list_json):
     Look at all tasks at once, and update the task description adding details to it for each task so that it can be executed by an agent without seeing the other tasks and to ensure consistency across all tasks. DETAILS ARE CRUCIAL. For example, if one task creates a class, it should have all the details about the class, including the arguments to be used in the constructor. If another task creates a function that uses the class, it should have the details about the class and the arguments to be used in the constructor.
 
     RETURN JSON OUTPUTS ONLY.
-    
+
     Here is the overall objective you need to refactor the tasks for: {objective}.
     Here is the task list you need to improve: {task_list_json}
-    
+
     RETURN THE SAME TASK LIST but with the description improved to contain the details you is adding for each task in the list. DO NOT MAKE OTHER MODIFICATIONS TO THE LIST. Your input should go in the 'description' field of each task.
-    
+
     RETURN JSON ONLY:"""
     return openai_call(prompt, temperature=0.7, max_tokens=2000)
+
 
 def code_tasks_context_agent(objective: str, task_list_json):
     prompt = f"""You are an AGI agent responsible for improving a list of tasks in JSON format and adding ALL the necessary context to it. These tasks will be executed individually by agents that have no idea about other tasks or what code exists in the codebase. It is FUNDAMENTAL that each task has enough context so that an individual isolated agent can execute. The metadata of the task is the only information the agents will have.
@@ -329,24 +366,25 @@ def code_tasks_context_agent(objective: str, task_list_json):
 
     Note that you should identify when imports need to happen and specify this in the context. Also, you should identify when functions/classes/etc already exist and specify this very clearly because the agents sometimes duplicate things not knowing.
 
-    Always use imports with the file name. For example, 'from my_script import MyScript'. 
-    
+    Always use imports with the file name. For example, 'from my_script import MyScript'.
+
     RETURN JSON OUTPUTS ONLY.
-    
+
     Here is the overall objective you need to refactor the tasks for: {objective}.
     Here is the task list you need to improve: {task_list_json}
-    
+
     RETURN THE SAME TASK LIST but with a new field called 'isolated_context' for each task in the list. This field should be a string with the context you are adding. DO NOT MAKE OTHER MODIFICATIONS TO THE LIST.
-    
+
     RETURN JSON ONLY:"""
     return openai_call(prompt, temperature=0.7, max_tokens=2000)
+
 
 def task_assigner_recommendation_agent(objective: str, task: str):
     prompt = f"""You are an AGI agent responsible for providing recommendations on which agent should be used to handle a specific task. Analyze the provided major objective of the project and a single task from the JSON checklist generated by the previous agent, and suggest the most appropriate agent to work on the task.
 
     The overall objective is: {objective}
     The current task is: {task}
-    
+
     The available agents are:
     1. code_writer_agent: Responsible for writing code based on the task description.
     2. code_refactor_agent: Responsible for editing existing code.
@@ -362,6 +400,7 @@ def task_assigner_recommendation_agent(objective: str, task: str):
     Based on the task and overall objective, suggest the most appropriate agent to work on the task."""
     return openai_call(prompt, temperature=0.5, max_tokens=2000)
 
+
 def task_assigner_agent(objective: str, task: str, recommendation: str):
     prompt = f"""You are an AGI agent responsible for choosing the best agent to work on a given task. Your goal is to analyze the provided major objective of the project and a single task from the JSON checklist generated by the previous agent, and choose the best agent to work on the task.
 
@@ -369,27 +408,29 @@ def task_assigner_agent(objective: str, task: str, recommendation: str):
     The current task is: {task}
 
     Use this recommendation to guide you: {recommendation}
-        
+
     The available agents are:
     1. code_writer_agent: Responsible for writing code based on the task description.
     2. code_refactor_agent: Responsible for editing existing code.
     2. command_executor_agent: Responsible for executing commands and handling file operations, such as creating, moving, or deleting files.
 
     Please consider the task description and the overall objective when choosing the most appropriate agent. Keep in mind that creating a file and writing code are different tasks. If the task involves creating a file, like "calculator.py" but does not mention writing any code inside it, the command_executor_agent should be used for this purpose. The code_writer_agent should only be used when the task requires writing or adding code to a file. The code_refactor_agent should only be used when the task requires modifying existing code.
-    
+
     TLDR: To create files, use command_executor_agent, to write text/code to files, use code_writer_agent, to modify existing code, use code_refactor_agent.
 
     Choose the most appropriate agent to work on the task and return a JSON output with the following format: {{"agent": "agent_name"}}. ONLY return JSON output:"""
     return openai_call(prompt, temperature=0, max_tokens=2000)
 
+
 def command_executor_agent(task: str, file_path: str):
-    prompt = f"""You are an AGI agent responsible for executing a given command on the {os_version} OS. Your goal is to analyze the provided major objective of the project and a single task from the JSON checklist generated by the previous agent, and execute the command on the {os_version} OS. 
+    prompt = f"""You are an AGI agent responsible for executing a given command on the {os_version} OS. Your goal is to analyze the provided major objective of the project and a single task from the JSON checklist generated by the previous agent, and execute the command on the {os_version} OS.
 
     The current task is: {task}
-    File or folder name referenced in the task (relative file path): {file_path} 
-    
+    File or folder name referenced in the task (relative file path): {file_path}
+
     Based on the task, write the appropriate command to execute on the {os_version} OS. Make sure the command is relevant to the task and objective. For example, if the task is to create a new folder, the command should be 'mkdir new_folder_name'. Return the command as a JSON output with the following format: {{"command": "command_to_execute"}}. ONLY return JSON output:"""
     return openai_call(prompt, temperature=0, max_tokens=2000)
+
 
 def code_writer_agent(task: str, isolated_context: str, context_code_chunks):
     prompt = f"""You are an AGI agent responsible for writing code to accomplish a given task. Your goal is to analyze the provided major objective of the project and a single task from the JSON checklist generated by the previous agent, and write the necessary code to complete the task.
@@ -397,17 +438,22 @@ def code_writer_agent(task: str, isolated_context: str, context_code_chunks):
     The current task is: {task}
 
     To help you make the code useful in this codebase, use this context as reference of the other pieces of the codebase that are relevant to your task. PAY ATTENTION TO THIS: {isolated_context}
-    
-    The following code chunks were found to be relevant to the task. You can use them as reference to write the code if they are useful. PAY CLOSE ATTENTION TO THIS: 
+
+    The following code chunks were found to be relevant to the task. You can use them as reference to write the code if they are useful. PAY CLOSE ATTENTION TO THIS:
     {context_code_chunks}
 
     Note: Always use 'encoding='utf-8'' when opening files with open().
-    
+
     Based on the task and objective, write the appropriate code to achieve the task. Make sure the code is relevant to the task and objective, and follows best practices. Return the code as a plain text output and NOTHING ELSE. Use identation and line breaks in the in the code. Make sure to only write the code and nothing else as your output will be saved directly to the file by other agent. IMPORTANT" If the task is asking you to write code to write files, this is a mistake! Interpret it and either do nothing or return  the plain code, not a code to write file, not a code to write code, etc."""
     return openai_call(prompt, temperature=0, max_tokens=2000)
 
-def code_refactor_agent(task_description: str, existing_code_snippet: str, context_chunks, isolated_context: str):
 
+def code_refactor_agent(
+    task_description: str,
+    existing_code_snippet: str,
+    context_chunks,
+    isolated_context: str,
+):
     prompt = f"""You are an AGI agent responsible for refactoring code to accomplish a given task. Your goal is to analyze the provided major objective of the project, the task descriptionm and refactor the code accordingly.
 
     The current task description is: {task_description}
@@ -415,17 +461,20 @@ def code_refactor_agent(task_description: str, existing_code_snippet: str, conte
 
     Here are some context chunks that might be relevant to the task:
     {context_chunks}
-    
-    Existing code you should refactor: 
+
+    Existing code you should refactor:
     {existing_code_snippet}
-    
+
     Based on the task description, objective, refactor the existing code to achieve the task. Make sure the refactored code is relevant to the task and objective, follows best practices, etc.
 
     Return a plain text code snippet with your refactored code. IMPORTANT: JUST RETURN CODE, YOUR OUTPUT WILL BE ADDED DIRECTLY TO THE FILE BY OTHER AGENT. BE MINDFUL OF THIS:"""
 
     return openai_call(prompt, temperature=0, max_tokens=2000)
 
-def file_management_agent(objective: str, task: str, current_directory_files: str, file_path: str):
+
+def file_management_agent(
+    objective: str, task: str, current_directory_files: str, file_path: str
+):
     prompt = f"""You are an AGI agent responsible for managing files in a software project. Your goal is to analyze the provided major objective of the project and a single task from the JSON checklist generated by the previous agent, and determine the appropriate file path and name for the generated code.
 
     The overall objective is: {objective}
@@ -441,6 +490,7 @@ def file_management_agent(objective: str, task: str, current_directory_files: st
     Based on the task, determine the file path and name for the generated code. Return the file path and name as a JSON output with the following format: {{"file_path": "file_path_and_name"}}. ONLY return JSON output:"""
     return openai_call(prompt, temperature=0, max_tokens=2000)
 
+
 def code_relevance_agent(objective: str, task_description: str, code_chunk: str):
     prompt = f"""You are an AGI agent responsible for evaluating the relevance of a code chunk in relation to a given task. Your goal is to analyze the provided major objective of the project, the task description, and the code chunk, and assign a relevance score from 0 to 10, where 0 is completely irrelevant and 10 is highly relevant.
 
@@ -454,6 +504,7 @@ def code_relevance_agent(objective: str, task_description: str, code_chunk: str)
     relevance_score = openai_call(prompt, temperature=0.5, max_tokens=50)
 
     return json.dumps({"relevance_score": relevance_score.strip()})
+
 
 def task_human_input_agent(task: str, human_feedback: str):
     prompt = f"""You are an AGI agent responsible for getting human input to improve the quality of tasks in a software project. Your goal is to analyze the provided task and adapt it based on the human's suggestions. The tasks should  start with either 'Run a command to...', 'Write code to...', or 'Edit existing code to...' depending on the agent that will execute the task.
@@ -472,14 +523,15 @@ def task_human_input_agent(task: str, human_feedback: str):
     If the human feedback is empty, return the task as is. If the human feedback is saying to ignore the task, return the following string: <IGNORE_TASK>
 
     Note that your output will replace the existing task, so make sure that your output is a valid task that starts with one of the required phrases ('Run a command to...', 'Write code to...', 'Edit existing code to...').
-    
+
     Please adjust the task based on the human feedback while ensuring it starts with one of the required phrases ('Run a command to...', 'Write code to...', 'Edit existing code to...'). Return the improved task as a plain text output and nothing else. Write only the new task."""
 
     return openai_call(prompt, temperature=0.3, max_tokens=200)
 
+
 ## END OF AGENTS ##
 
-print_colored_text(f"****Objective****", color='green')
+print_colored_text(f"****Objective****", color="green")
 print_char_by_char(OBJECTIVE, 0.00001, 10)
 
 # Create the tasks
@@ -524,10 +576,14 @@ for task in task_json["tasks"]:
     #     continue
     # print_colored_text("*****IMPROVED TASK*****", "green")
     # print_char_by_char(task_description)
-    
+
     # Assign the task to an agent
-    task_assigner_recommendation = task_assigner_recommendation_agent(OBJECTIVE, task_description)
-    task_agent_output = task_assigner_agent(OBJECTIVE, task_description, task_assigner_recommendation)
+    task_assigner_recommendation = task_assigner_recommendation_agent(
+        OBJECTIVE, task_description
+    )
+    task_agent_output = task_assigner_agent(
+        OBJECTIVE, task_description, task_assigner_recommendation
+    )
 
     print_colored_text("*****ASSIGN*****", "yellow")
     print_char_by_char(task_agent_output)
@@ -535,10 +591,12 @@ for task in task_json["tasks"]:
     chosen_agent = json.loads(task_agent_output)["agent"]
 
     if chosen_agent == "command_executor_agent":
-        command_executor_output = command_executor_agent(task_description, task["file_path"])
+        command_executor_output = command_executor_agent(
+            task_description, task["file_path"]
+        )
         print_colored_text("*****COMMAND*****", "green")
         print_char_by_char(command_executor_output)
-        
+
         command_execution_output = execute_command_json(command_executor_output)
     else:
         # CODE AGENTS
@@ -547,16 +605,22 @@ for task in task_json["tasks"]:
             # This will recompute embeddings for all files in the 'playground' directory
             print_colored_text("*****RETRIEVING RELEVANT CODE CONTEXT*****", "yellow")
             embeddings.compute_repository_embeddings()
-            relevant_chunks = embeddings.get_relevant_code_chunks(task_description, task_isolated_context)
+            relevant_chunks = embeddings.get_relevant_code_chunks(
+                task_description, task_isolated_context
+            )
 
             current_directory_files = execute_command_string("ls")
-            file_management_output = file_management_agent(OBJECTIVE, task_description, current_directory_files, task["file_path"])
+            file_management_output = file_management_agent(
+                OBJECTIVE, task_description, current_directory_files, task["file_path"]
+            )
             print_colored_text("*****FILE MANAGEMENT*****", "yellow")
             print_char_by_char(file_management_output)
             file_path = json.loads(file_management_output)["file_path"]
 
-            code_writer_output = code_writer_agent(task_description, task_isolated_context, relevant_chunks)
-            
+            code_writer_output = code_writer_agent(
+                task_description, task_isolated_context, relevant_chunks
+            )
+
             print_colored_text("*****CODE*****", "green")
             print_char_by_char(code_writer_output)
 
@@ -565,19 +629,21 @@ for task in task_json["tasks"]:
 
         elif chosen_agent == "code_refactor_agent":
             # The code refactor agent works with multiple agents:
-            # For each task, the file_management_agent is used to select the file to edit.Then, the 
-            # code_relevance_agent is used to select the relevant code chunks from that filewith the 
-            # goal of finding the code chunk that is most relevant to the task description. This is 
-            # the code chunk that will be edited. Finally, the code_refactor_agent is used to edit 
+            # For each task, the file_management_agent is used to select the file to edit.Then, the
+            # code_relevance_agent is used to select the relevant code chunks from that filewith the
+            # goal of finding the code chunk that is most relevant to the task description. This is
+            # the code chunk that will be edited. Finally, the code_refactor_agent is used to edit
             # the code chunk.
 
             current_directory_files = execute_command_string("ls")
-            file_management_output = file_management_agent(OBJECTIVE, task_description, current_directory_files, task["file_path"])
+            file_management_output = file_management_agent(
+                OBJECTIVE, task_description, current_directory_files, task["file_path"]
+            )
             file_path = json.loads(file_management_output)["file_path"]
 
             print_colored_text("*****FILE MANAGEMENT*****", "yellow")
             print_char_by_char(file_management_output)
-            
+
             # Split the code into chunks and get the relevance scores for each chunk
             code_chunks = split_code_into_chunks(file_path, 80)
             print_colored_text("*****ANALYZING EXISTING CODE*****", "yellow")
@@ -587,10 +653,17 @@ for task in task_json["tasks"]:
                 relevance_scores.append(score)
 
             # Select the most relevant chunk
-            selected_chunk = sorted(zip(relevance_scores, code_chunks), key=lambda x: x[0], reverse=True)[0][1]
+            selected_chunk = sorted(
+                zip(relevance_scores, code_chunks), key=lambda x: x[0], reverse=True
+            )[0][1]
 
             # Refactor the code
-            modified_code_output = code_refactor_agent(task_description, selected_chunk, context_chunks=[selected_chunk], isolated_context=task_isolated_context)
+            modified_code_output = code_refactor_agent(
+                task_description,
+                selected_chunk,
+                context_chunks=[selected_chunk],
+                isolated_context=task_isolated_context,
+            )
 
             # Extract the start_line and end_line of the selected chunk. This will be used to replace the code in the original file
             start_line = selected_chunk["start_line"]
@@ -602,7 +675,7 @@ for task in task_json["tasks"]:
             modified_code_info = {
                 "start_line": start_line,
                 "end_line": start_line + modified_code_lines - 1,
-                "modified_code": modified_code_output
+                "modified_code": modified_code_output,
             }
             print_colored_text("*****REFACTORED CODE*****", "green")
             print_char_by_char(modified_code_output)

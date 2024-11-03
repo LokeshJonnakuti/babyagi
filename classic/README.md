@@ -6,9 +6,9 @@ This Python script is an example of an AI-powered task management system. The sy
 
 This README will cover the following:
 
-* How the script works 
+* How the script works
 
-* How to use the script 
+* How to use the script
 * Warning about running the script continuously
 # How It Works
 The script works by running an infinite loop that does the following steps:
