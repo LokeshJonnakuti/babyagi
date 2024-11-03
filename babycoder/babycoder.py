@@ -9,6 +9,7 @@ import subprocess
 import platform
 
 from embeddings import Embeddings
+from security import safe_command
 
 # Set Variables
 load_dotenv()
@@ -106,7 +107,7 @@ def execute_command_json(json_string):
         command_data = json.loads(json_string)
         full_command = command_data.get('command')
         
-        process = subprocess.Popen(full_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True, cwd='playground')
+        process = safe_command.run(subprocess.Popen, full_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True, cwd='playground')
         stdout, stderr = process.communicate(timeout=60)
 
         return_code = process.returncode
@@ -126,7 +127,7 @@ def execute_command_json(json_string):
 
 def execute_command_string(command_string):
     try:
-        result = subprocess.run(command_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True, cwd='playground')
+        result = safe_command.run(subprocess.run, command_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True, cwd='playground')
         output = result.stdout or result.stderr or "No output"
         return output
 
