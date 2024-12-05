@@ -1,9 +1,9 @@
 from skills.skill import Skill
 import openai
-import requests
 import os
 import json
 from urllib.parse import urlparse
+from security import safe_requests
 
 class PlayMusic(Skill):
     name = 'play_music'
@@ -17,7 +17,7 @@ class PlayMusic(Skill):
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
         
-        response = requests.get(url)
+        response = safe_requests.get(url)
         
         # Extract file name from URL
         parsed_url = urlparse(url)
@@ -57,7 +57,7 @@ class PlayMusic(Skill):
         
         params = {"q": f"{search_type}:'{query}'"}
         
-        response = requests.get(base_url, params=params)
+        response = safe_requests.get(base_url, params=params)
         
         if response.status_code != 200:
             print("Failed to get data:", response.status_code)

@@ -5,6 +5,7 @@ import openai
 from bs4 import BeautifulSoup
 import requests
 import re
+from security import safe_requests
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36"
@@ -101,7 +102,7 @@ class WebSearch(Skill):
     
     def fetch_url_content(self,url: str):
         try:
-            response = requests.get(url, headers=headers, timeout=10)
+            response = safe_requests.get(url, headers=headers, timeout=10)
             response.raise_for_status()
             return response.content
         except requests.exceptions.RequestException as e:
